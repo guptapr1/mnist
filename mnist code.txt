@@ -1,0 +1,118 @@
+# Fashion Mnist\n",
+    "import numpy as np\n",
+    "import pandas as pd\n",
+    "import gzip\n",
+    "import matplotlib.pyplot as plt\n",
+    "%matplotlib inline\n",
+    "import matplotlib"
+def showImage(data):\n",
+    "    some_article = data   # Selecting the image.\n",
+    "    some_article_image = some_article.reshape(28, 28) # Reshaping it to get the 28x28 pixels\n",
+    "    plt.imshow(some_article_image, cmap = matplotlib.cm.binary, interpolation=\"nearest\")\n",
+    "    plt.axis(\"off\")\n",
+    "    plt.show()"
+filePath_train_set=('/cxldata/datasets/project/fashion-mnist/train-images-idx3-ubyte.gz')\n",
+    "filePath_train_label=('/cxldata/datasets/project/fashion-mnist/train-labels-idx1-ubyte.gz')\n",
+    "filePath_test_set='/cxldata/datasets/project/fashion-mnist/t10k-images-idx3-ubyte.gz'\n",
+    "filePath_test_label='/cxldata/datasets/project/fashion-mnist/t10k-labels-idx1-ubyte.gz'"
+with gzip.open(filePath_train_label,'rb') as trainLbpath:\n",
+    "    trainLabel=np.frombuffer(trainLbpath.read(), dtype=np.uint8,\n",
+    "                               offset=8)\n",
+    "with gzip.open(filePath_train_set, 'rb') as trainSetpath:\n",
+    "     trainSet = np.frombuffer(trainSetpath.read(), dtype=np.uint8,\n",
+    "                               offset=16).reshape(len(trainLabel), 784)\n",
+    "\n",
+    "with gzip.open(filePath_test_label, 'rb') as testLbpath:\n",
+    "     testLabel = np.frombuffer(testLbpath.read(), dtype=np.uint8,\n",
+    "                               offset=8)\n",
+    "\n",
+    "with gzip.open(filePath_test_set, 'rb') as testSetpath:\n",
+    "     testSet = np.frombuffer(testSetpath.read(), dtype=np.uint8,\n",
+    "                               offset=16).reshape(len(testLabel), 784)"
+X_train=trainSet\n",
+    "X_test=testSet\n",
+    "y_train=trainLabel\n",
+    "y_test=testLabel"
+np.random.seed(42)"
+shuffle_index = np.random.permutation(60000)"
+X_train, y_train = X_train[shuffle_index], y_train[shuffle_index]
+from sklearn.preprocessing import StandardScaler"
+scaler=StandardScaler()"
+from sklearn.metrics import precision_score,recall_score,f1_score
+from sklearn.linear_model import SGDClassifier
+"sgd_clf=SGDClassifier(random_state=42)"
+sgd_clf.fit(X_train_scaled,y_train)"
+y_train_predict=sgd_clf.predict(X_train[0].reshape(1,-1))
+y_train_predict=sgd_clf.predict(X_train_scaled)\n",
+    "sgd_accuracy = accuracy_score(y_train,y_train_predict)\n",
+    "sgd_precision = precision_score(y_train, y_train_predict, average='weighted')\n",
+    "sgd_recall = recall_score(y_train,y_train_predict, average='weighted')
+sgd_f1_score = f1_score(y_train,y_train_predict, average='weighted')"
+from sklearn.linear_model import LogisticRegression
+log_clf=LogisticRegression(multi_class=\"multinomial\",solver=\"lbfgs\",C=10,random_state=42)
+log_clf.fit(X_train_scaled,y_train)
+y_train_predict=log_clf.predict(X_train[0].reshape(1,-1))
+y_train_predict=log_clf.predict(X_train_scaled)
+log_accuracy = accuracy_score(y_train,y_train_predict)\n",
+    "log_precision = precision_score(y_train, y_train_predict, average='weighted')\n",
+    "log_recall = recall_score(y_train,y_train_predict, average='weighted')\n",
+    "log_f1_score = f1_score(y_train,y_train_predict, average='weighted')\n",
+    "print(log_accuracy,log_precision,log_recall,log_f1_score)"
+from sklearn.tree import DecisionTreeClassifier"
+dec_tree_clf=DecisionTreeClassifier(max_depth=50,random_state=42)
+y_train_predict=dec_tree_clf.predict(X_train[0].reshape(1,-1))"
+y_train_predict=dec_tree_clf.predict(X_train)
+dec_tree_accuracy = accuracy_score(y_train,y_train_predict)\n",
+    "dec_tree_precision = precision_score(y_train, y_train_predict, average='weighted')\n",
+    "dec_tree_recall = recall_score(y_train,y_train_predict, average='weighted')\n",
+    "dec_tree_f1_score = f1_score(y_train,y_train_predict, average='weighted')\n",
+    "print(dec_tree_accuracy,dec_tree_precision,dec_tree_recall,dec_tree_f1_score)"
+from sklearn.ensemble import RandomForestClassifier"
+rnd_clf=RandomForestClassifier(n_estimators=100, max_depth=50, random_state=42)"
+rnd_clf.fit(X_train,y_train)"
+y_train_predict=rnd_clf.predict(X_train)"
+rnd_accuracy = accuracy_score(y_train,y_train_predict)\n",
+    "rnd_precision = precision_score(y_train, y_train_predict, average='weighted')\n",
+    "rnd_recall = recall_score(y_train,y_train_predict, average='weighted')\n",
+    "rnd_f1_score = f1_score(y_train,y_train_predict, average='weighted')\n",
+    "print(rnd_accuracy,rnd_precision,rnd_recall,rnd_f1_score)"from sklearn.ensemble import VotingClassifier"
+   
+log_clf_ens=LogisticRegression(multi_class=\"multinomial\", solver=\"lbfgs\", C=10,random_state=42)"
+rnd_clf_ens=RandomForestClassifier(n_estimators=100, max_depth=50,random_state=42)
+voting_clf=VotingClassifier(estimators=[('lr',log_clf_ens),('rf',rnd_clf_ens)],\n",
+    "                           voting='soft')"
+voting_clf.fit(X_train_scaled,y_train)"
+y_train_predict=voting_clf.predict(X_train_scaled)
+voting_accuracy = accuracy_score(y_train,y_train_predict)\n",
+    "voting_precision = precision_score(y_train, y_train_predict, average='weighted')\n",
+    "voting_recall = recall_score(y_train,y_train_predict, average='weighted')\n",
+    "voting_f1_score = f1_score(y_train,y_train_predict, average='weighted')\n",
+    "print(voting_accuracy,voting_precision,voting_recall,voting_f1_score)
+from sklearn.model_selection import cross_val_score\n",
+    "from sklearn.model_selection import cross_val_predict"
+from sklearn.metrics import confusion_matrix"
+log_clf = LogisticRegression(multi_class=\"multinomial\", solver=\"lbfgs\", C=10, random_state=42\n",
+    ") \n",
+    "\n",
+    "log_cv_scores = cross_val_score(log_clf, X_train_scaled, y_train, cv=3, scoring=\"accuracy\") \n",
+    "display_scores(log_cv_scores)\n",
+    "log_cv_accuracy = log_cv_scores.mean()\n",
+    "\n",
+    "y_train_pred = cross_val_predict(log_clf, X_train_scaled, y_train, cv=3)\n",
+    "confusion_matrix(y_train, y_train_pred)\n",
+    "log_cv_precision = precision_score(y_train, y_train_pred, average='weighted')\n",
+    "log_cv_recall = recall_score(y_train, y_train_pred, average='weighted')\n",
+    "log_cv_f1_score = f1_score(y_train, y_train_pred, average='weighted')\n",
+    "\n",
+    "print(\"Logistic CV Accuracy: \", log_cv_accuracy)\n",
+    "print(\"Logistic CV Precision: \", log_cv_precision)\n",
+    "print(\"Logistic CV Recall: \", log_cv_recall)\n",
+    "print(\"Logistic CV F1 Score: \", log_cv_f1_score)
+from sklearn.decomposition import PCA"
+pca=PCA(n_components=0.99)
+X_train_reduced=pca.fit_transform(X_train)
+pca.n_components_
+# Checking if hit your 99% minimum?\n",
+    "np.sum(pca.explained_variance_ratio_)"
+X_train_recovered = pca.inverse_transform(X_train_reduced)\n",
+    "pca.n_components_"
